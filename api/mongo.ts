@@ -85,6 +85,96 @@ export default class Mongo {
 
     return places;
   };
+
+  getAllTags = async () => {
+    const pipeline = [
+      {
+        $unwind: "$types",
+      },
+      {
+        $group: {
+          _id: null,
+          res: {
+            $addToSet: "$types",
+          },
+        },
+      },
+    ];
+
+    return await this.collection.aggregate(pipeline).toArray();
+  };
+
+  getPlacesWithoutWebsiteByTags = async () => {
+    const pipeline = [
+      {
+        $match: {
+          "informations.website": {
+            $exists: false,
+          },
+          types: {
+            $in: [
+              "shopping_mall",
+              "bar",
+              "food",
+              "book_store",
+              "home_goods_store",
+              "convenience_store",
+              "library",
+              "clothing_store",
+              "city_hall",
+              "supermarket",
+              "restaunrant",
+              "beauty_salon",
+              "store",
+              "shoe_store",
+              "jewelry_store",
+              "electronics_store",
+            ],
+          },
+          business_status: {
+            $not: {
+              $eq: "CLOSED_TEMPORARILY",
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          "geometry.location": 1,
+          name: 1,
+          types: 1,
+          "informations.formatted_address": 1,
+          "informations.international_phone_number": 1,
+        },
+      },
+      {
+        $addFields: {
+          longitude: "$geometry.location.lng",
+          lattitude: "$geometry.location.lat",
+          addresse: "$informations.formatted_address",
+          phone: "$informations.international_phone_number",
+          types: {
+            $reduce: {
+              input: "$types",
+              initialValue: "",
+              in: {
+                $concat: ["$$value", " ", "$$this"],
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          informations: 0,
+          geometry: 0,
+        },
+      },
+    ];
+
+    return await this.collection.aggregate(pipeline).toArray();
+  };
 }
 
 export const getCollection = async (database: string, collection: string) => {

@@ -170,3 +170,4 @@ dist
 
 data
 .DS_Store
+export_place_without_website.csv
