@@ -6,11 +6,11 @@ import utils from "./utils/utils.js";
 import { Document } from "mongodb";
 import { writeToCSV } from "./api/csv.js";
 
-const main = async () => {
-  //Mongo connection
-  const collection = await getCollection("google-api", "places");
-  const mongo = new Mongo(collection);
+//Mongo connection
+const collection = await getCollection("google-api", "places");
+const mongo = new Mongo(collection);
 
+const main = async () => {
   // For the first case await mongo.clearDatabase();
 
   console.log("Mongo DB done");
@@ -32,16 +32,26 @@ const main = async () => {
 
   await notion.clearDatabase();
 
-  const placesNoWebSite = await mongo.withOutWebsite();
+  const placesNoWebSite = await mongo.getPlacesWithoutWebsiteByTags();
 
   await notion.addRows(placesNoWebSite);
 
   console.log("End notion");
+
+  writeToCSV(placesNoWebSite);
 };
 
-const collection = await getCollection("google-api", "places");
-const mongo = new Mongo(collection);
+//Notion upload
+console.log("Start notion");
 
-const places = await mongo.getPlacesWithoutWebsiteByTags();
+const notion = new Notion();
 
-writeToCSV(places);
+await notion.clearDatabase();
+
+const placesNoWebSite = await mongo.getPlacesWithoutWebsiteByTags();
+
+await notion.addRows(placesNoWebSite);
+
+console.log("End notion");
+
+writeToCSV(placesNoWebSite);

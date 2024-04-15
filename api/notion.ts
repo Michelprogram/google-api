@@ -40,7 +40,7 @@ export default class Notion {
             title: [
               {
                 text: {
-                  content: place.address,
+                  content: place.addresse,
                 },
               },
             ],
@@ -88,3 +88,4 @@ export default class Notion {
 };
 
 await getPage(); */
+https://www.google.com/maps/place/Silva+Beauty/@47.4023181,0.6810877,17z/data=!3m1?entry=ttu
